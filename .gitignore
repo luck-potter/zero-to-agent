@@ -1,0 +1,37 @@
+# Python 虚拟环境
+.venv/
+venv/
+
+# Python 字节码与工具缓存
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# 测试覆盖率与构建产物
+.coverage
+.coverage.*
+coverage.xml
+htmlcov/
+build/
+dist/
+*.egg-info/
+
+# 本地环境变量与模型密钥；允许提交示例配置
+.env
+.env.*
+!.env.example
+!.env.*.example
+
+# 本地生成的 FAISS 索引
+/data/faiss/
+/faiss_index/
+
+# 本地日志与编辑器配置
+*.log
+.idea/
+
+# macOS 生成文件
+.DS_Store
+._*
