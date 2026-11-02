@@ -6,7 +6,7 @@
 
 - 已有 `main.py`，包含 `GET /` 的 Hello World 示例、支持路径参数和可选查询参数的 `GET /hello/{name}` 问候接口，以及接收并返回 JSON 问题的 `POST /questions` 接口。
 - 环境已就绪：`pyproject.toml`、`uv.lock` 已生成，`.venv` 使用 uv 管理的 CPython 3.12.13，已安装 `fastapi[standard]` 和 `langchain-openai`。
-- 当前学习进度：第 1 天三关均已通过。第 2 天已完成模型服务选择、`.env` 配置与首次模型调用；提示词模板已实现，`FastAPI` 和 `Pydantic` 两个主题的运行结果及模板填充、模型调用的基础理解均已验收。下一小步是添加字符串输出解析器，当前待实现与验收；LCEL 尚未开始。
+- 当前学习进度：第 1 天和第 2 天均已完成验收。已完成模型服务选择、`.env` 配置、首次模型调用、提示词模板、字符串输出解析器和 LCEL；同一条 Chain 的 `Pydantic`、`FastAPI` 两种主题均得到对应的三句话解释和 `True`，各组件职责及输出传递的基础理解已验收。下一小步是准备一份内容熟悉的 Markdown/TXT 文档，第 3 天尚未开始。
 - 助手已通过 `curl` 和浏览器 `/docs` 验证 `GET /` 返回状态码 `200` 和 `{"Hello":"World"}`；学习者已说明应用对象、路由装饰器和处理函数的基本关系，验收记录见学习计划。
 - 已有独立的 `llm_demo.py` 模型调用示例；文档检索、问答接口和 Docker 部署将在后续步骤中逐步实现。
 
@@ -17,7 +17,7 @@
 | 文件 | 用途 |
 | --- | --- |
 | [main.py](main.py) | FastAPI 应用入口，包含 Hello World、问候路由和接收 JSON 问题的接口 |
-| [llm_demo.py](llm_demo.py) | 独立的模型调用示例，读取配置、用 `topic` 填充提示词模板并打印模型回答 |
+| [llm_demo.py](llm_demo.py) | 独立的 LCEL 示例，读取配置，通过模板、模型、解析器组成的 Chain 解释 `topic` 并打印字符串结果 |
 | [第一周学习计划.md](第一周学习计划.md) | 每日任务、验收标准、进度勾选和复盘记录 |
 | [AGENTS.md](AGENTS.md) | AI 助手在本项目中的协作与开发约定 |
 | [README.md](README.md) | 项目介绍、运行方法和学习入口 |
@@ -138,9 +138,9 @@ LLM_MODEL=gpt-6-luna
 uv run --env-file .env python llm_demo.py
 ```
 
-脚本使用 `ChatPromptTemplate` 定义“请用三句话解释什么是 {topic}。”，由 `prompt.invoke(...)` 填入主题，再通过 `llm.invoke(prompt_value)` 请求模型并打印回复。当前 `topic` 为 `Pydantic`；修改 `prompt.invoke({"topic": "Pydantic"})` 中的主题值后重新运行，即可解释其他概念。
+脚本使用 `ChatPromptTemplate` 定义“请用三句话解释什么是 {topic}。”，通过 `chain = prompt | llm | parser` 连接提示词模板、模型和 `StrOutputParser`。调用 `chain.invoke({"topic": "FastAPI"})` 后，依次填入主题、请求模型、将回复消息解析为正文字符串，最后打印正文及 `isinstance(result, str)` 的检查结果。当前 `topic` 为 `FastAPI`；修改 `chain.invoke(...)` 中的主题值后重新运行，即可复用同一条 Chain 解释其他概念。
 
-学习者已提供 `FastAPI` 和 `Pydantic` 两个主题的终端输出，均返回对应主题的三句话解释；助手此前已在本地验证模板能正确填入两种主题。学习者已说明 `prompt.invoke(...)` 将主题填入占位符，`llm.invoke(...)` 真正向模型服务发送请求；提示词模板的代码、运行和基础理解均已验收。字符串输出解析器和 LCEL 尚未实现。
+学习者此前在逐步调用版本中提供了 `FastAPI` 和 `Pydantic` 两个主题的输出，并说明模板填充与模型请求的区别，提示词模板验收通过。加入解析器后，学习者提供了 Pydantic 的三句话解释和 `True`，并确认解析器只处理已有消息、不再次请求模型服务，解析器验收通过。LCEL 版本已由助手只读核对代码；学习者先后将同一条 Chain 的主题设为 `Pydantic` 和 `FastAPI`，两次均得到对应的三句话解释和 `True`，并已说明 `llm` 的输出交给 `parser`、组件通过统一接口组合，LCEL 基础理解及两主题复用均已验收，第 2 天完成。以上模型运行依据均为学习者提供的实际输出，助手未另行请求模型服务。
 
 ## 本周目标
 
@@ -157,4 +157,4 @@ uv run --env-file .env python llm_demo.py
 
 每次安排 60–90 分钟，做不完就顺延。先理解当前小步骤的目标，再实现和验证；完成验收后继续下一项。
 
-第 1 天三关均已通过，第 2 天的模型配置、首次调用和提示词模板已完成验收。下一小步是在 `llm_demo.py` 中添加 `StrOutputParser`，将模型回复消息解析为文本，运行并确认输出属于字符串；任务勾选和验收依据见 [第一周学习计划](第一周学习计划.md)。
+第 1 天和第 2 天均已完成验收。下一小步是准备一份内容熟悉、包含几个清晰小节的 Markdown/TXT 文档，作为第 3 天读取与分块的练习材料；第 3 天尚未开始。任务勾选和验收依据见 [第一周学习计划](第一周学习计划.md)。
