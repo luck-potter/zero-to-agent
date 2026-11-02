@@ -4,9 +4,9 @@
 
 ## 当前进度
 
-- 已有 `main.py`，包含 `GET /` 的 Hello World 示例与支持路径参数、可选查询参数的 `GET /hello/{name}` 问候接口。
+- 已有 `main.py`，包含 `GET /` 的 Hello World 示例、支持路径参数和可选查询参数的 `GET /hello/{name}` 问候接口，以及接收并返回 JSON 问题的 `POST /questions` 接口。
 - 环境已就绪：`pyproject.toml`、`uv.lock` 已生成，`.venv` 使用 uv 管理的 CPython 3.12.13，已安装 `fastapi[standard]`。
-- 当前学习进度：第 1 天第一关和第二关均已通过；路径参数与可选查询参数的实现、运行及基础概念均已验收，下一步是第三关，接收并校验 JSON 请求体。
+- 当前学习进度：第 1 天三关均已通过。路由、参数、JSON 请求体与基础校验的代码和运行已验证，学习者操作与基础概念验收已完成；GET 与 POST 自带不同加密能力的误解已纠正，学习者已确认 HTTPS 下的 GET 也有传输加密。下一步是第 2 天，先确定可用的模型服务。
 - 助手已通过 `curl` 和浏览器 `/docs` 验证 `GET /` 返回状态码 `200` 和 `{"Hello":"World"}`；学习者已说明应用对象、路由装饰器和处理函数的基本关系，验收记录见学习计划。
 - 模型调用、文档检索、问答接口和 Docker 部署将在后续步骤中逐步实现。
 
@@ -16,7 +16,7 @@
 
 | 文件 | 用途 |
 | --- | --- |
-| [main.py](main.py) | FastAPI 应用入口，包含 Hello World 与可选择中英文的问候路由 |
+| [main.py](main.py) | FastAPI 应用入口，包含 Hello World、问候路由和接收 JSON 问题的接口 |
 | [第一周学习计划.md](第一周学习计划.md) | 每日任务、验收标准、进度勾选和复盘记录 |
 | [AGENTS.md](AGENTS.md) | AI 助手在本项目中的协作与开发约定 |
 | [README.md](README.md) | 项目介绍、运行方法和学习入口 |
@@ -90,6 +90,26 @@ curl -sS -i 'http://127.0.0.1:8000/hello/xuzhi?language=zh'
 
 也可在 `/docs` 中展开 `GET /hello/{name}`，点击 `Try it out`，填写 `name` 和 `language` 后点击 `Execute`，对比 `en` 与 `zh` 的结果。学习者已反馈完成此操作；助手随后在浏览器中分别执行两次请求，确认实际状态码均为 `200`，响应体分别为 `{"message":"Hello, xuzhi!"}` 和 `{"message":"你好，xuzhi！"}`。截图见 [英文响应](output/playwright/docs-hello-en-response.png) 和 [中文响应](output/playwright/docs-hello-zh-response.png)。
 
+### 提交 JSON 问题
+
+服务运行时，可执行下面的命令：
+
+```bash
+curl -sS -i -X POST http://127.0.0.1:8000/questions \
+  -H 'Content-Type: application/json' \
+  -d '{"question":"什么是 FastAPI？","language":"zh"}'
+```
+
+预期状态码为 `200`，响应体为：
+
+```json
+{"question":"什么是 FastAPI？","language":"zh"}
+```
+
+接口目前原样返回问题与语言。`language` 可以省略，默认值为 `"en"`；`question` 必须是至少包含 1 个字符的字符串，缺少字段或提交空字符串 `""` 都会返回 `422`。
+
+以上行为已由助手使用当前应用的本地 `TestClient` 验证。学习者已反馈完成 `/docs` 操作；助手随后使用 Playwright 在浏览器中展开 `POST /questions`，点击 `Try it out`，分别填写正常问题、`{}` 和 `{"question":""}` 并点击 `Execute`，确认 `Server response` 的实际状态码依次为 `200`、`422`、`422`，两次错误分别为 `missing` 和 `string_too_short`，均指向 `body → question`。三次响应头均包含 `content-type: application/json`，操作验收通过。截图见 [正常问题](output/playwright/docs-questions-valid-response.png)、[缺少字段](output/playwright/docs-questions-missing-response.png) 和 [空字符串](output/playwright/docs-questions-empty-response.png)。
+
 ### 已有依赖配置时恢复环境
 
 完成首次初始化、已有 `pyproject.toml` 和 `uv.lock` 后，可以使用：
@@ -114,4 +134,4 @@ uv run fastapi dev main.py
 
 每次安排 60–90 分钟，做不完就顺延。先理解当前小步骤的目标，再实现和验证；完成验收后继续下一项。
 
-第 1 天第二关已通过。下一步从 [第三关：接收并校验 JSON](第一周学习计划.md#第三关接收并校验-json) 开始，先学习用 Pydantic 定义包含 `question` 字段的请求模型。
+第 1 天三关均已通过。[第三关：接收并校验 JSON](第一周学习计划.md#第三关接收并校验-json) 的代码、运行、学习者操作与基础概念验收均已完成。下一小步是第 2 天，先确定可用的模型服务，再准备模型名称与环境变量，完成一次最简单的模型调用。
