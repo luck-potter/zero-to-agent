@@ -4,11 +4,11 @@
 
 ## 当前进度
 
-- 已有 `main.py`，包含 `GET /` 的 Hello World 示例、支持路径参数和可选查询参数的 `GET /hello/{name}` 问候接口，以及接收并返回 JSON 问题的 `POST /questions` 接口。
+- 已有 `src/main.py`，包含 `GET /` 的 Hello World 示例、支持路径参数和可选查询参数的 `GET /hello/{name}` 问候接口，以及接收并返回 JSON 问题的 `POST /questions` 接口。
 - 环境已就绪：`pyproject.toml`、`uv.lock` 已生成，`.venv` 使用 uv 管理的 CPython 3.12.13，已安装 `fastapi[standard]`、`langchain-openai` 和 `langchain-text-splitters`。
 - 当前学习进度：第 1 天和第 2 天均已完成验收。已完成模型服务选择、`.env` 配置、首次模型调用、提示词模板、字符串输出解析器和 LCEL；同一条 Chain 的 `Pydantic`、`FastAPI` 两种主题均得到对应的三句话解释和 `True`，各组件职责及输出传递的基础理解已验收。第 3 天五项操作任务均已完成，包含块大小从 300 调整为 500 后的内容比较；代码与运行已有验证依据，块大小、重叠和内容相关性的整体概念理解继续巩固。
 - 助手已通过 `curl` 和浏览器 `/docs` 验证 `GET /` 返回状态码 `200` 和 `{"Hello":"World"}`；学习者已说明应用对象、路由装饰器和处理函数的基本关系，验收记录见学习计划。
-- 已有独立的 `llm_demo.py` 模型调用示例；文档检索、问答接口和 Docker 部署将在后续步骤中逐步实现。
+- 已有独立的 `src/llm_demo.py` 模型调用示例；文档检索、问答接口和 Docker 部署将在后续步骤中逐步实现。
 
 任务勾选和学习记录统一维护在 [第一周学习计划](第一周学习计划.md) 中。
 
@@ -16,14 +16,16 @@
 
 | 文件 | 用途 |
 | --- | --- |
-| [main.py](main.py) | FastAPI 应用入口，包含 Hello World、问候路由和接收 JSON 问题的接口 |
-| [llm_demo.py](llm_demo.py) | 独立的 LCEL 示例，读取配置，通过模板、模型、解析器组成的 Chain 解释 `topic` 并打印字符串结果 |
+| [src/main.py](src/main.py) | FastAPI 应用入口，包含 Hello World、问候路由和接收 JSON 问题的接口 |
+| [src/llm_demo.py](src/llm_demo.py) | 独立的 LCEL 示例，读取配置，通过模板、模型、解析器组成的 Chain 解释 `topic` 并打印字符串结果 |
 | [data/notes.md](data/notes.md) | 第 3 天的 RAG 练习材料，记录当前项目中的路由、参数、请求体与校验 |
-| [load_demo.py](load_demo.py) | 读取练习文档，创建包含正文和来源元数据的 `Document`，打印正文、元数据及字符数 |
-| [split_demo.py](split_demo.py) | 将练习文档分块，打印文本块数量，以及前 3 块的正文、字符数与来源 |
+| [src/load_demo.py](src/load_demo.py) | 读取练习文档，创建包含正文和来源元数据的 `Document`，打印正文、元数据及字符数 |
+| [src/split_demo.py](src/split_demo.py) | 将练习文档分块，打印文本块数量，以及前 3 块的正文、字符数与来源 |
 | [第一周学习计划.md](第一周学习计划.md) | 每日任务、验收标准、进度勾选和复盘记录 |
 | [AGENTS.md](AGENTS.md) | AI 助手在本项目中的协作与开发约定 |
 | [README.md](README.md) | 项目介绍、运行方法和学习入口 |
+
+源码（包括学习示例脚本）统一放在项目根目录的 `src/` 下；练习文档放在 `data/`，`pyproject.toml`、`uv.lock`、本地 `.env` 和说明文档保留在根目录。下方所有命令均从项目根目录执行。
 
 ## 运行 Hello World
 
@@ -47,7 +49,7 @@ uv add "fastapi[standard]"
 ### 启动服务
 
 ```bash
-uv run fastapi dev main.py
+uv run fastapi dev src/main.py
 ```
 
 保持终端运行，在浏览器访问：
@@ -120,7 +122,7 @@ curl -sS -i -X POST http://127.0.0.1:8000/questions \
 
 ```bash
 uv sync
-uv run fastapi dev main.py
+uv run fastapi dev src/main.py
 ```
 
 ## 运行模型调用示例
@@ -138,7 +140,7 @@ LLM_MODEL=gpt-6-luna
 在项目根目录执行：
 
 ```bash
-uv run --env-file .env python llm_demo.py
+uv run --env-file .env python src/llm_demo.py
 ```
 
 脚本使用 `ChatPromptTemplate` 定义“请用三句话解释什么是 {topic}。”，通过 `chain = prompt | llm | parser` 连接提示词模板、模型和 `StrOutputParser`。调用 `chain.invoke({"topic": "FastAPI"})` 后，依次填入主题、请求模型、将回复消息解析为正文字符串，最后打印正文及 `isinstance(result, str)` 的检查结果。当前 `topic` 为 `FastAPI`；修改 `chain.invoke(...)` 中的主题值后重新运行，即可复用同一条 Chain 解释其他概念。
@@ -150,19 +152,19 @@ uv run --env-file .env python llm_demo.py
 在项目根目录执行：
 
 ```bash
-uv run python load_demo.py
+uv run python src/load_demo.py
 ```
 
-脚本根据自身所在目录定位 `data/notes.md`，使用 Python 标准库 `pathlib` 以 UTF-8 读取正文，再创建 LangChain 的 `Document` 对象：`page_content` 保存正文，`metadata` 字典中的 `source` 保存文件的绝对路径。
+脚本根据自身路径找到项目根目录（`src/` 的上一级），再定位 `data/notes.md`，使用 Python 标准库 `pathlib` 以 UTF-8 读取正文，再创建 LangChain 的 `Document` 对象：`page_content` 保存正文，`metadata` 字典中的 `source` 保存文件的绝对路径。
 
-预期输出为完整笔记、包含 `source` 的元数据字典，以及字符数；当前文档为 1322 个字符，包含 Markdown 标记、空格和换行。助手已使用项目的 `langchain-core` 1.7.3 环境执行 `uv run --no-sync python load_demo.py`，确认上述结果。学习者已准确说明 `page_content` 保存正文，`metadata` 保存来源等元数据，并提供 `uv run python load_demo.py` 的完整输出，正文、来源路径和字符数均符合预期，文档加载这一步通过。
+预期输出为完整笔记、包含 `source` 的元数据字典，以及字符数；当前文档为 1322 个字符，包含 Markdown 标记、空格和换行。迁移至 `src/` 前，助手已使用项目的 `langchain-core` 1.7.3 环境执行 `uv run --no-sync python load_demo.py`，确认上述结果。学习者已准确说明 `page_content` 保存正文，`metadata` 保存来源等元数据，并提供当时的 `uv run python load_demo.py` 的完整输出，正文、来源路径和字符数均符合预期，文档加载这一步通过。
 
 ## 运行文档分块示例
 
 在项目根目录执行：
 
 ```bash
-uv run python split_demo.py
+uv run python src/split_demo.py
 ```
 
 脚本重新读取练习文档并创建 `Document`，再使用 `RecursiveCharacterTextSplitter` 分块。当前参数为 `chunk_size=500`、`chunk_overlap=50`、`length_function=len`：按字符数计量块大小，目标重叠为 50 个字符。分割器优先沿段落、换行等位置切分，实际块长与重叠受切分位置影响。本次只把块大小从 300 调整为 500，用于比较内容边界。
