@@ -5,8 +5,9 @@
 ## 当前进度
 
 - 已有 `main.py`，包含 `GET /` 的 Hello World 示例。
-- 当前学习步骤：第 1 天第一关，启动服务并验证根路径与 `/docs`。
-- 服务运行和学习验收尚未完成。
+- 环境已就绪：`pyproject.toml`、`uv.lock` 已生成，`.venv` 使用 uv 管理的 CPython 3.12.13，已安装 `fastapi[standard]`。
+- 当前学习进度：第 1 天第一关已通过，下一步是第二关，学习路径参数与查询参数。
+- 助手已通过 `curl` 和浏览器 `/docs` 验证 `GET /` 返回状态码 `200` 和 `{"Hello":"World"}`；学习者已说明应用对象、路由装饰器和处理函数的基本关系，验收记录见学习计划。
 - 模型调用、文档检索、问答接口和 Docker 部署将在后续步骤中逐步实现。
 
 任务勾选和学习记录统一维护在 [第一周学习计划](第一周学习计划.md) 中。
@@ -26,14 +27,18 @@
 
 ### 首次准备环境
 
-当前尚未创建 `pyproject.toml`，首次学习时执行：
+项目名使用 `fastapi-rag-learning`，避免与依赖包 `fastapi` 同名（同名时 `uv add` 会报 self-dependency 错误）。
+
+初始化命令如下，**已执行过，无需重复**：
 
 ```bash
 uv init --bare --python 3.12
 uv add "fastapi[standard]"
 ```
 
-完成后会生成项目配置、依赖锁文件与虚拟环境。后续不需要重复执行 `uv init`。
+完成后会生成 `pyproject.toml`、`uv.lock` 与 `.venv`。
+
+> 踩坑记录：如果 `.venv` 是别处或旧版解释器建的（例如 Homebrew Python 3.15 报 `platform.mac_ver()` 为空），`uv` 会继续复用它并报 `Broken Python installation`。此时删除重建即可：`rm -rf .venv && uv venv --python 3.12`。
 
 ### 启动服务
 
@@ -93,4 +98,4 @@ uv run fastapi dev main.py
 
 每次安排 60–90 分钟，做不完就顺延。先理解当前小步骤的目标，再实现和验证；完成验收后继续下一项。
 
-现在从 [第 1 天：先把 FastAPI 跑起来](第一周学习计划.md#第-1-天先把-fastapi-跑起来) 开始。
+下一步从 [第 1 天第二关：接收请求参数](第一周学习计划.md#第二关接收请求参数) 开始。

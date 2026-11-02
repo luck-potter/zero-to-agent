@@ -35,3 +35,6 @@ dist/
 # macOS 生成文件
 .DS_Store
 ._*
+
+# Agent 生成文件
+.playwright-cli
